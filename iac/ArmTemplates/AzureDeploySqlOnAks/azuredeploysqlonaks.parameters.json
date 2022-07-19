@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "mewurk-aks-name": {
+      "value": "#arm_mewurk-aks-name#"
+    },
+    "workspaces_defaultworkspace_672af1bb_6b87_4874_b13b_98b834a1df8e_cin_externalid": {
+      "value": "/subscriptions/672af1bb-6b87-4874-b13b-98b834a1df8e/resourceGroups/defaultresourcegroup-cin/providers/microsoft.operationalinsights/workspaces/defaultworkspace-672af1bb-6b87-4874-b13b-98b834a1df8e-cin"
+    },
+    "workspaces_defaultworkspace_cin_externalid": {
+      "value": "/subscriptions/672af1bb-6b87-4874-b13b-98b834a1df8e/resourcegroups/vivek-gt2-aks-sql-rg/providers/microsoft.operationalinsights/workspaces/vivek-gt2-aks-sql-log-anal-ws"
+    },
+    "servicePrincipalClientId": {
+      "value": "#arm_mewurk-aks-servicePrincipalClientId#"
+    },
+    "servicePrincipalClientSecret": {
+      "value": "#arm_mewurk-aks-servicePrincipalClientSecret#"
+    },
+    "logAnalyticWorkspaceName": {
+      "value": "#arm_mewurk-log-anal-workspace-name#"
+    },
+    "logAnalyticWorkspaceRetentionInDays": {
+      "value": 30
+    }
+  }
+}

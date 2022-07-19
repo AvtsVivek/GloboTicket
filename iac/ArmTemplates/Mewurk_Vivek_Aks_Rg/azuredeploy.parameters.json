@@ -1,0 +1,87 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaces_defaultworkspace_672af1bb_6b87_4874_b13b_98b834a1df8e_cin_externalid": {
+      "value": "/subscriptions/672af1bb-6b87-4874-b13b-98b834a1df8e/resourceGroups/defaultresourcegroup-cin/providers/microsoft.operationalinsights/workspaces/defaultworkspace-672af1bb-6b87-4874-b13b-98b834a1df8e-cin"
+    },
+    "publicIPAddresses_0d8d984f_98ad_4a92_9228_5730f0708127_externalid": {
+      "value": "/subscriptions/672af1bb-6b87-4874-b13b-98b834a1df8e/resourceGroups/MC_MeWurk_Vivek_aks_Rg_mewurk-aks-aks-vivek_centralindia/providers/Microsoft.Network/publicIPAddresses/0d8d984f-98ad-4a92-9228-5730f0708127"
+    },
+    "mewurk-vivek-aksAdminLogin": {
+      "value": "#arm_MeWurk_Aks_SqlServer_Admin_UserName#"
+    },
+    "mewurk-vivek-aksAdminLoginPassword": {
+      "value": "#arm_MeWurk_Aks_SqlServer_Admin_Password#"
+    },
+    "mewurk-sql-serverName": {
+      "value": "#arm_MeWurk_Aks_SqlServerName#"
+    },
+    "mewurk-sql-discount-dbName": {
+      "value": "#arm_MeWurk_Aks_SqlDiscountDbName#"
+    },
+    "mewurk-sql-event-catalog-dbName": {
+      "value": "#arm_MeWurk_Aks_SqlEventCatalogDbName#"
+    },
+    "mewurk-sql-marketing-dbName": {
+      "value": "#arm_MeWurk_Aks_SqlMarketingDbName#"
+    },
+    "mewurk-sql-order-dbName": {
+      "value": "#arm_MeWurk_Aks_SqlOrderDbName#"
+    },
+    "mewurk-sql-shopping-basket-dbName": {
+      "value": "#arm_MeWurk_Aks_SqlShoppingBasketDbName#"
+    },
+    "create-sql-server": {
+      "value": "#arm_MeWurk_create-sql-server#"
+    },
+    "create-discount-db": {
+      "value": "#arm_MeWurk_create-discount-db#"
+    },
+    "create-event-catalog-db": {
+      "value": "#arm_MeWurk_create-event-catalog-db#"
+    },
+    "create-marketing-db": {
+      "value": "#arm_MeWurk_create-marketing-db#"
+    },
+    "create-order-db": {
+      "value": "#arm_MeWurk_create-order-db#"
+    },
+    "create-shopping-basket-db": {
+      "value": "#arm_MeWurk_create-shopping-basket-db#"
+    },
+    "create-servicebus-namespace": {
+      "value": "#arm_Mewurk_create-servicebus-namespace#"
+    },
+    "allowClientIp": {
+      "value": true
+    },
+    "clientIpRuleName": {
+      "value": "#arm_MeWurk_Sql_FireWall_RuleName#"
+    },
+    "clientIpValue": {
+      "value": "#arm_MeWurk_Aks_SqlAllowedClientIpValue#"
+    },
+    "mewurk-aks-name": {
+      "value": "#arm_mewurk-aks-name#"
+    },
+    "servicePrincipalClientId": {
+      "value": "#arm_mewurk-aks-servicePrincipalClientId#"
+    },
+    "servicePrincipalClientSecret": {
+      "value": "#arm_mewurk-aks-servicePrincipalClientSecret#"
+    },
+    "aks_networkPlugin": {
+      "value": "kubenet"
+    },
+    "aks_enableRBAC": {
+      "value": true
+    },
+    "registries_MewurkAcr_name": {
+      "value": "#arm_container_registry#"
+    },
+    "namespaces_servicebus_name": {
+      "value": "#arm_service_bus#"
+    }
+  }
+}

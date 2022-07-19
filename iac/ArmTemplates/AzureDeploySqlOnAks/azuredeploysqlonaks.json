@@ -1,0 +1,267 @@
+{
+  //"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "mewurk-aks-name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspaces_defaultworkspace_672af1bb_6b87_4874_b13b_98b834a1df8e_cin_externalid": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "workspaces_defaultworkspace_cin_externalid": {
+      "defaultValue": "/subscriptions/672af1bb-6b87-4874-b13b-98b834a1df8e/resourcegroups/vivek-gt2-aks-sql-rg/providers/microsoft.operationalinsights/workspaces/vivek-gt2-aks-sql-log-anal-ws",
+      "type": "String"
+    },
+    "publicIPAddresses_externalid": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "aks_enableRBAC": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Boolean flag to turn on and off of RBAC."
+      }
+    },
+    "servicePrincipalClientId": {
+      "metadata": {
+        "description": "Client ID (used by cloudprovider)."
+      },
+      "type": "securestring"
+    },
+    "servicePrincipalClientSecret": {
+      "metadata": {
+        "description": "The Service Principal Client Secret."
+      },
+      "type": "securestring"
+    },
+    // Log analytic workspaces. loganalyticworkspace
+    "logAnalyticWorkspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the workspace."
+      }
+    },
+    "logAnalyticWorkspaceSku": {
+      "type": "string",
+      "defaultValue": "pergb2018",
+      "allowedValues": [
+        "pergb2018",
+        "Free",
+        "Standalone",
+        "PerNode",
+        "Standard",
+        "Premium"
+      ],
+      "metadata": {
+        "description": "Pricing tier: PerGB2018 or legacy tiers (Free, Standalone, PerNode, Standard or Premium) which are not available to all customers."
+      }
+    },
+    //"logAnalyticWorkspaceLocation": {
+    //  "type": "string",
+    //  "defaultValue": "centralindia",
+    //  "allowedValues": [
+    //    "australiacentral",
+    //    "australiaeast",
+    //    "australiasoutheast",
+    //    "brazilsouth",
+    //    "canadacentral",
+    //    "centralindia",
+    //    "centralus",
+    //    "eastasia",
+    //    "eastus",
+    //    "eastus2",
+    //    "francecentral",
+    //    "japaneast",
+    //    "koreacentral",
+    //    "northcentralus",
+    //    "northeurope",
+    //    "southafricanorth",
+    //    "southcentralus",
+    //    "southeastasia",
+    //    "switzerlandnorth",
+    //    "switzerlandwest",
+    //    "uksouth",
+    //    "ukwest",
+    //    "westcentralus",
+    //    "westeurope",
+    //    "westus",
+    //    "westus2"
+    //  ],
+    //  "metadata": {
+    //    "description": "Specifies the location for the workspace."
+    //  }
+    //},
+    "logAnalyticWorkspaceRetentionInDays": {
+      "type": "int",
+      "defaultValue": 30,
+      "metadata": {
+        "description": "Number of days to retain data."
+      }
+    },
+    "logAnalyticWorkspaceResourcePermissions": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "true to use resource or workspace permissions. false to require workspace permissions."
+      }
+    }
+  }, 
+  //"functions": [],
+  //"variables": {},
+  "variables": {
+    "aks-dns-prefix": "[concat(parameters('mewurk-aks-name'), '-dns')]",
+    "logAnalyticsWorkspaceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/microsoft.operationalinsights/workspaces/', parameters('logAnalyticWorkspaceName'))]"
+  },
+  "resources": [
+    {
+      "name": "[parameters('mewurk-aks-name')]",
+      "type": "Microsoft.ContainerService/managedClusters",
+      "apiVersion": "2021-07-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Basic",
+        "tier": "Free"
+      },
+      "properties": {
+        "kubernetesVersion": "1.20.9",
+        "addonProfiles": {
+          "azurepolicy": {
+            "enabled": false
+          },
+          "httpApplicationRouting": {
+            "enabled": false
+          },
+          "omsAgent": {
+            "enabled": true
+            ,
+            "config": {
+              //"logAnalyticsWorkspaceResourceID": "[parameters('workspaces_defaultworkspace_cin_externalid')]"
+              "logAnalyticsWorkspaceResourceID": "[variables('logAnalyticsWorkspaceId')]"
+              //"logAnalyticsWorkspaceResourceID": "[parameters('workspaces_defaultworkspace_672af1bb_6b87_4874_b13b_98b834a1df8e_cin_externalid')]"
+            }
+          }
+        },
+        "enableRBAC": "[parameters('aks_enableRBAC')]",
+        "dnsPrefix": "[variables('aks-dns-prefix')]",
+        "agentPoolProfiles": [
+          {
+            "name": "nodepool1",
+            "count": 2,
+            "vmSize": "Standard_DS2_v2",
+            "osDiskSizeGB": 128,
+            "osDiskType": "Managed",
+            "kubeletDiskType": "OS",
+            "maxPods": 110,
+            "type": "VirtualMachineScaleSets",
+            "maxCount": 5,
+            "minCount": 1,
+            "enableAutoScaling": true,
+            "orchestratorVersion": "1.20.7",
+            "nodeLabels": {},
+            "mode": "System",
+            "osType": "Linux",
+            "osSKU": "Ubuntu",
+            "enableFIPS": false,
+            "storageProfile": "ManagedDisks",
+            "enableNodePublicIP": false,
+            "enableEncryptionAtHost": false,
+            "enableUltraSSD": false
+          }
+        ],
+        "servicePrincipalProfile": {
+          "ClientId": "[parameters('servicePrincipalClientId')]",
+          "Secret": "[parameters('servicePrincipalClientSecret')]"
+          //"aadSessionKey": "[parameters('aadSessionKey')]"
+          //"clientId": "msi"
+        },
+        // A new Resource group is created. Take a look at the following ref.
+        // Ref: https://docs.microsoft.com/en-us/azure/aks/faq#why-are-two-resource-groups-created-with-aks
+        "nodeResourceGroup": "[concat(resourceGroup().name, '_', parameters('mewurk-aks-name'), '_', resourceGroup().location)]",
+        //"nodeResourceGroup": "[concat('MC_MeWurk_Vivek_aks_Rg_', parameters('mewurk-aks-name'), '_centralindia')]",
+        "networkProfile": {
+          "networkPlugin": "kubenet",
+          "loadBalancerSku": "Standard",
+          "loadBalancerProfile": {
+            "managedOutboundIPs": {
+              "count": 1
+            },
+            "effectiveOutboundIPs": [
+              {
+                "id": "[parameters('publicIPAddresses_externalid')]"
+              }
+            ]
+          },
+          "podCidr": "10.244.0.0/16",
+          "serviceCidr": "10.0.0.0/16",
+          "dnsServiceIP": "10.0.0.10",
+          "dockerBridgeCidr": "172.17.0.1/16",
+          "outboundType": "loadBalancer"
+        },
+        "apiServerAccessProfile": {
+          "enablePrivateCluster": false
+        },
+        //"identityProfile": {
+        //  "kubeletidentity": {
+        //    "resourceId": "[parameters('userAssignedIdentities_mewurk_aks_aks_vivek_agentpool_externalid')]"
+        //    //"clientId": "8c3f91bc-7076-44f3-8a89-4aeb52a84392",
+        //    //"objectId": "dab0d2e5-1a5d-4694-a9e3-8c9435ab7e8a"
+        //  }
+        //},
+        "autoScalerProfile": {
+          "balance-similar-node-groups": "false",
+          "expander": "random",
+          "max-empty-bulk-delete": "10",
+          "max-graceful-termination-sec": "600",
+          "max-node-provision-time": "15m",
+          "max-total-unready-percentage": "45",
+          "new-pod-scale-up-delay": "0s",
+          "ok-total-unready-count": "3",
+          "scale-down-delay-after-add": "10m",
+          "scale-down-delay-after-delete": "10s",
+          "scale-down-delay-after-failure": "3m",
+          "scale-down-unneeded-time": "10m",
+          "scale-down-unready-time": "20m",
+          "scale-down-utilization-threshold": "0.5",
+          "scan-interval": "10s",
+          "skip-nodes-with-local-storage": "false",
+          "skip-nodes-with-system-pods": "true"
+        }
+        //"identity": {
+        //  "type": "SystemAssigned"
+        //},
+        //"linuxProfile": {
+        //  "adminUsername": "adminUserName",
+        //  "ssh": {
+        //    "publicKeys": [
+        //      {
+        //        "keyData": "[parameters('sshRSAPublicKey')]"
+        //      }
+        //    ]
+        //  }
+        //}
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2020-08-01",
+      "name": "[parameters('logAnalyticWorkspaceName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "sku": {
+          "name": "[parameters('logAnalyticWorkspaceSku')]"
+        },
+        "retentionInDays": "[parameters('logAnalyticWorkspaceRetentionInDays')]",
+        "features": {
+          "searchVersion": 1,
+          "legacy": 0,
+          "enableLogAccessUsingOnlyResourcePermissions": "[parameters('logAnalyticWorkspaceResourcePermissions')]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

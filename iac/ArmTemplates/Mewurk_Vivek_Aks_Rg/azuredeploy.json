@@ -1,0 +1,862 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaces_defaultworkspace_672af1bb_6b87_4874_b13b_98b834a1df8e_cin_externalid": {
+      //"defaultValue": "/subscriptions/672af1bb-6b87-4874-b13b-98b834a1df8e/resourceGroups/defaultresourcegroup-cin/providers/microsoft.operationalinsights/workspaces/defaultworkspace-672af1bb-6b87-4874-b13b-98b834a1df8e-cin",
+      "defaultValue": "",
+      "type": "String"
+    },
+    "publicIPAddresses_0d8d984f_98ad_4a92_9228_5730f0708127_externalid": {
+      //"defaultValue": "/subscriptions/672af1bb-6b87-4874-b13b-98b834a1df8e/resourceGroups/MC_MeWurk_Vivek_aks_Rg_mewurk-aks-aks-vivek_centralindia/providers/Microsoft.Network/publicIPAddresses/0d8d984f-98ad-4a92-9228-5730f0708127",
+      "defaultValue": "",
+      "type": "String"
+    },
+    //"userAssignedIdentities_mewurk_aks_aks_vivek_agentpool_externalid": {
+    //  "defaultValue": "/subscriptions/672af1bb-6b87-4874-b13b-98b834a1df8e/resourceGroups/MC_MeWurk_Vivek_aks_Rg_mewurk-aks-aks-vivek_centralindia/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mewurk-aks-aks-vivek-agentpool",
+    //  "type": "String"
+    //},
+    "mewurk-vivek-aksAdminLogin": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mewurk-vivek-aksAdminLoginPassword": {
+      "type": "securestring"
+    },
+    "mewurk-sql-serverName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "create-sql-server": {
+      "type": "string",
+      "allowedValues": [
+        "true",
+        "false"
+      ],
+      "defaultValue": "false"
+    },
+    "create-discount-db": {
+      "type": "string",
+      "allowedValues": [
+        "true",
+        "false"
+      ],
+      "defaultValue": "false"
+    },
+    "create-event-catalog-db": {
+      "type": "string",
+      "allowedValues": [
+        "true",
+        "false"
+      ],
+      "defaultValue": "false"
+    },
+    "create-marketing-db": {
+      "type": "string",
+      "allowedValues": [
+        "true",
+        "false"
+      ],
+      "defaultValue": "false"
+    },
+    "create-order-db": {
+      "type": "string",
+      "allowedValues": [
+        "true",
+        "false"
+      ],
+      "defaultValue": "false"
+    },
+    "create-shopping-basket-db": {
+      "type": "string",
+      "allowedValues": [
+        "true",
+        "false"
+      ],
+      "defaultValue": "false"
+    },
+    "mewurk-sql-discount-dbName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mewurk-sql-event-catalog-dbName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mewurk-sql-marketing-dbName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mewurk-sql-order-dbName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mewurk-sql-shopping-basket-dbName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mewurk-sql-discount-dbCollation": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "mewurk-sql-event-catalog-dbCollation": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "mewurk-sql-marketing-dbCollation": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "mewurk-sql-order-dbCollation": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "mewurk-sql-shopping-basket-dbCollation": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "mewurk-sql-discount-dbEdition": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "Standard",
+        "Premium"
+      ]
+    },
+    "mewurk-sql-event-catalog-dbEdition": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "Standard",
+        "Premium"
+      ]
+    },
+    "mewurk-sql-marketing-dbEdition": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "Standard",
+        "Premium"
+      ]
+    },
+    "mewurk-sql-order-dbEdition": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "Standard",
+        "Premium"
+      ]
+    },
+    "mewurk-sql-shopping-basket-dbEdition": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "Standard",
+        "Premium"
+      ]
+    },
+    "mewurk-sql-discount-dbRequestedServiceObjectiveName": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "S0",
+        "S1",
+        "S2",
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "metadata": {
+        "description": "Describes the performance level for Edition"
+      }
+    },
+    "mewurk-sql-event-catalog-dbRequestedServiceObjectiveName": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "S0",
+        "S1",
+        "S2",
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "metadata": {
+        "description": "Describes the performance level for Edition"
+      }
+    },
+    "mewurk-sql-marketing-dbRequestedServiceObjectiveName": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "S0",
+        "S1",
+        "S2",
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "metadata": {
+        "description": "Describes the performance level for Edition"
+      }
+    },
+    "mewurk-sql-order-dbRequestedServiceObjectiveName": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "S0",
+        "S1",
+        "S2",
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "metadata": {
+        "description": "Describes the performance level for Edition"
+      }
+    },
+    "mewurk-sql-shopping-basket-dbRequestedServiceObjectiveName": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "S0",
+        "S1",
+        "S2",
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "metadata": {
+        "description": "Describes the performance level for Edition"
+      }
+    },
+    "allowClientIp": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "clientIpRuleName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "clientIpValue": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    //"sshRSAPublicKey": {
+    //  "type": "string",
+    //  "metadata": {
+    //    "description": "Configure all linux machines with the SSH RSA public key string. Your key should include three parts, for example 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'"
+    //  },
+    //  "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP4mFTYOi4yRTqDMyHx/AHfvPK47lkolnvPUAjBkBrU0RCWTqQi2jk51qQfUwAxSzn4ft/usVFUQx7T5UnkyBNqto8W5RBGKHksU1k+wdLQ6fTvX23GyrmyAVX13xB8JSMw/rrBfCaygFXx73SYg9P5uJaPiXlIXAA/rzzT0LA6dgrjB78ge4TMn9HLzkgWndg3G6WXi7XRCSkjYz35BTOxHvJGKjeqCf5FWgOPv6s+FRJyl4jUGnx4yCAcGJzARA+mP0L1T7pdUpN9loJGK8Cfh5O3fKByByw5+bT33FgCE7MK+rpji/rsUiXqBF2XZjU9oEPFo/i4ywwL1NW32+/"
+    //},
+    "aks_networkPlugin": {
+      "type": "string",
+      "allowedValues": [
+        "azure",
+        "kubenet"
+      ],
+      "metadata": {
+        "description": "Network plugin used for building Kubernetes network."
+      }
+    },
+    "aks_enableRBAC": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Boolean flag to turn on and off of RBAC."
+      }
+    },
+    "mewurk-aks-name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "servicePrincipalClientId": {
+      "metadata": {
+        "description": "Client ID (used by cloudprovider)."
+      },
+      "type": "securestring"
+    },
+    "servicePrincipalClientSecret": {
+      "metadata": {
+        "description": "The Service Principal Client Secret."
+      },
+      "type": "securestring"
+    },
+    "aadSessionKey": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "registries_MewurkAcr_name": {
+      "defaultValue": "MewurkAcr",
+      "type": "String"
+    },
+    "namespaces_servicebus_name": {
+      "defaultValue": "mewurksb",
+      "type": "String"
+    },
+    "create-servicebus-namespace": {
+      "type": "string",
+      "allowedValues": [
+        "true",
+        "false"
+      ],
+      "defaultValue": "false"
+    }
+  },
+  "variables": {
+    //"aks-dns-prefix": "[concat(parameters('mewurk-aks-name'), uniqueString(resourceGroup().id))]",
+    "aks-dns-prefix": "[concat(parameters('mewurk-aks-name'), '-dns')]",
+    "mewurk-vivek-sqlserver-name": "[concat(parameters('mewurk-sql-serverName'))]"
+    //"registries-mewurkacr-name": "[parameters('registries_MewurkAcr_name')]"
+
+  },
+  "resources": [
+    {
+      "condition": "[equals(parameters('create-sql-server'),'true')]",
+      "name": "[variables('mewurk-vivek-sqlserver-name')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2021-02-01-preview",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "mewurk-vivek-aks"
+      },
+      "properties": {
+        "administratorLogin": "[parameters('mewurk-vivek-aksAdminLogin')]",
+        "administratorLoginPassword": "[parameters('mewurk-vivek-aksAdminLoginPassword')]"
+      },
+      "resources": [
+        {
+          "condition": "[equals(parameters('create-sql-server'),'true')]",
+          "name": "AllowAllWindowsAzureIps",
+          "type": "firewallrules",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers', variables('mewurk-vivek-sqlserver-name'))]"
+          ],
+          "properties": {
+            "startIpAddress": "0.0.0.0",
+            "endIpAddress": "0.0.0.0"
+          }
+        },
+        {
+          "condition": "[parameters('allowClientIp')]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', variables('mewurk-vivek-sqlserver-name'))]"
+          ],
+          "name": "[parameters('clientIpRuleName')]",
+          "properties": {
+            "endIpAddress": "[parameters('clientIpValue')]",
+            "startIpAddress": "[parameters('clientIpValue')]"
+          },
+          "type": "firewallrules"
+        },
+        {
+          "condition": "[equals(parameters('create-discount-db'),'true')]",
+          "name": "[parameters('mewurk-sql-discount-dbName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers', variables('mewurk-vivek-sqlserver-name'))]"
+          ],
+          "tags": {
+            "displayName": "[parameters('mewurk-sql-discount-dbName')]"
+          },
+          "properties": {
+            "collation": "[parameters('mewurk-sql-discount-dbCollation')]",
+            "edition": "[parameters('mewurk-sql-discount-dbEdition')]",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "[parameters('mewurk-sql-discount-dbRequestedServiceObjectiveName')]"
+          }
+        },
+        {
+          "condition": "[equals(parameters('create-event-catalog-db'),'true')]",
+          "name": "[parameters('mewurk-sql-event-catalog-dbName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers', variables('mewurk-vivek-sqlserver-name'))]"
+          ],
+          "tags": {
+            "displayName": "[parameters('mewurk-sql-event-catalog-dbName')]"
+          },
+          "properties": {
+            "collation": "[parameters('mewurk-sql-event-catalog-dbCollation')]",
+            "edition": "[parameters('mewurk-sql-event-catalog-dbEdition')]",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "[parameters('mewurk-sql-event-catalog-dbRequestedServiceObjectiveName')]"
+          }
+        },
+        {
+          "condition": "[equals(parameters('create-marketing-db'),'true')]",
+          "name": "[parameters('mewurk-sql-marketing-dbName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers', variables('mewurk-vivek-sqlserver-name'))]"
+          ],
+          "tags": {
+            "displayName": "[parameters('mewurk-sql-marketing-dbName')]"
+          },
+          "properties": {
+            "collation": "[parameters('mewurk-sql-marketing-dbCollation')]",
+            "edition": "[parameters('mewurk-sql-marketing-dbEdition')]",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "[parameters('mewurk-sql-marketing-dbRequestedServiceObjectiveName')]"
+          }
+        },
+        {
+          "condition": "[equals(parameters('create-order-db'),'true')]",
+          "name": "[parameters('mewurk-sql-order-dbName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers', variables('mewurk-vivek-sqlserver-name'))]"
+          ],
+          "tags": {
+            "displayName": "[parameters('mewurk-sql-order-dbName')]"
+          },
+          "properties": {
+            "collation": "[parameters('mewurk-sql-order-dbCollation')]",
+            "edition": "[parameters('mewurk-sql-order-dbEdition')]",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "[parameters('mewurk-sql-order-dbRequestedServiceObjectiveName')]"
+          }
+        },
+        {
+          "condition": "[equals(parameters('create-shopping-basket-db'),'true')]",
+          "name": "[parameters('mewurk-sql-shopping-basket-dbName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers', variables('mewurk-vivek-sqlserver-name'))]"
+          ],
+          "tags": {
+            "displayName": "[parameters('mewurk-sql-shopping-basket-dbName')]"
+          },
+          "properties": {
+            "collation": "[parameters('mewurk-sql-shopping-basket-dbCollation')]",
+            "edition": "[parameters('mewurk-sql-shopping-basket-dbEdition')]",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "[parameters('mewurk-sql-shopping-basket-dbRequestedServiceObjectiveName')]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "[parameters('mewurk-aks-name')]",
+      "type": "Microsoft.ContainerService/managedClusters",
+      "apiVersion": "2021-07-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Basic",
+        "tier": "Free"
+      },
+      "properties": {
+        //"kubernetesVersion": "1.20.9", It should be 1.20.9
+        "kubernetesVersion": "1.20.7",
+        "addonProfiles": {
+          "azurepolicy": {
+            "enabled": false
+          },
+          "httpApplicationRouting": {
+            "enabled": false
+          },
+          "omsAgent": {
+            "enabled": true,
+            "config": {
+              "logAnalyticsWorkspaceResourceID": "[parameters('workspaces_defaultworkspace_672af1bb_6b87_4874_b13b_98b834a1df8e_cin_externalid')]"
+            }
+          }
+        },
+        "enableRBAC": "[parameters('aks_enableRBAC')]",
+        "dnsPrefix": "[variables('aks-dns-prefix')]",
+        "agentPoolProfiles": [
+          {
+            "name": "nodepool1",
+            "count": 2,
+            "vmSize": "Standard_DS2_v2",
+            "osDiskSizeGB": 128,
+            "osDiskType": "Managed",
+            "kubeletDiskType": "OS",
+            "maxPods": 110,
+            "type": "VirtualMachineScaleSets",
+            "maxCount": 5,
+            "minCount": 1,
+            "enableAutoScaling": true,
+            "orchestratorVersion": "1.20.7",
+            "nodeLabels": {},
+            "mode": "System",
+            "osType": "Linux",
+            "osSKU": "Ubuntu",
+            "enableFIPS": false,
+            "storageProfile": "ManagedDisks",
+            // Note the following.
+            "enableNodePublicIP": false,
+            "enableEncryptionAtHost": false,
+            "enableUltraSSD": false
+          }
+        ],
+        "servicePrincipalProfile": {
+          "ClientId": "[parameters('servicePrincipalClientId')]",
+          "Secret": "[parameters('servicePrincipalClientSecret')]"
+          //"aadSessionKey": "[parameters('aadSessionKey')]"
+          //"clientId": "msi"
+        },
+        // A new Resource group is created. Take a look at the following ref.
+        // Ref: https://docs.microsoft.com/en-us/azure/aks/faq#why-are-two-resource-groups-created-with-aks
+        "nodeResourceGroup": "[concat(resourceGroup().name, '_', parameters('mewurk-aks-name'), '_', resourceGroup().location)]",
+        //"nodeResourceGroup": "[concat('MC_MeWurk_Vivek_aks_Rg_', parameters('mewurk-aks-name'), '_centralindia')]",
+        "networkProfile": {
+          "networkPlugin": "kubenet",
+          "loadBalancerSku": "Standard",
+          "loadBalancerProfile": {
+            "managedOutboundIPs": {
+              "count": 1
+            },
+            "effectiveOutboundIPs": [
+              {
+                "id": "[parameters('publicIPAddresses_0d8d984f_98ad_4a92_9228_5730f0708127_externalid')]"
+              }
+            ]
+          },
+          "podCidr": "10.244.0.0/16",
+          "serviceCidr": "10.0.0.0/16",
+          "dnsServiceIP": "10.0.0.10",
+          "dockerBridgeCidr": "172.17.0.1/16",
+          "outboundType": "loadBalancer"
+        },
+        "apiServerAccessProfile": {
+          "enablePrivateCluster": false
+        },
+        //"identityProfile": {
+        //  "kubeletidentity": {
+        //    "resourceId": "[parameters('userAssignedIdentities_mewurk_aks_aks_vivek_agentpool_externalid')]"
+        //    //"clientId": "8c3f91bc-7076-44f3-8a89-4aeb52a84392",
+        //    //"objectId": "dab0d2e5-1a5d-4694-a9e3-8c9435ab7e8a"
+        //  }
+        //},
+        "autoScalerProfile": {
+          "balance-similar-node-groups": "false",
+          "expander": "random",
+          "max-empty-bulk-delete": "10",
+          "max-graceful-termination-sec": "600",
+          "max-node-provision-time": "15m",
+          "max-total-unready-percentage": "45",
+          "new-pod-scale-up-delay": "0s",
+          "ok-total-unready-count": "3",
+          "scale-down-delay-after-add": "10m",
+          "scale-down-delay-after-delete": "10s",
+          "scale-down-delay-after-failure": "3m",
+          "scale-down-unneeded-time": "10m",
+          "scale-down-unready-time": "20m",
+          "scale-down-utilization-threshold": "0.5",
+          "scan-interval": "10s",
+          "skip-nodes-with-local-storage": "false",
+          "skip-nodes-with-system-pods": "true"
+        }
+        //"identity": {
+        //  "type": "SystemAssigned"
+        //},
+        //"linuxProfile": {
+        //  "adminUsername": "adminUserName",
+        //  "ssh": {
+        //    "publicKeys": [
+        //      {
+        //        "keyData": "[parameters('sshRSAPublicKey')]"
+        //      }
+        //    ]
+        //  }
+        //}
+      }
+    },
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "apiVersion": "2021-06-01-preview",
+      "name": "[parameters('registries_MewurkAcr_name')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Basic",
+        "tier": "Basic"
+      },
+      "properties": {
+        "adminUserEnabled": false,
+        "policies": {
+          "quarantinePolicy": {
+            "status": "disabled"
+          },
+          "trustPolicy": {
+            "type": "Notary",
+            "status": "disabled"
+          },
+          "retentionPolicy": {
+            "days": 7,
+            "status": "disabled"
+          },
+          "exportPolicy": {
+            "status": "enabled"
+          }
+        },
+        "encryption": {
+          "status": "disabled"
+        },
+        "dataEndpointEnabled": false,
+        "publicNetworkAccess": "Enabled",
+        "networkRuleBypassOptions": "AzureServices",
+        "zoneRedundancy": "Disabled",
+        "anonymousPullEnabled": false
+      }
+    },
+    {
+      "condition": "[equals(parameters('create-servicebus-namespace'),'true')]",
+      "type": "Microsoft.ServiceBus/namespaces",
+      "apiVersion": "2021-01-01-preview",
+      "name": "[parameters('namespaces_servicebus_name')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Standard"
+      },
+      "properties": {
+        "zoneRedundant": false
+      }
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
+      "apiVersion": "2021-01-01-preview",
+      "name": "[concat(parameters('namespaces_servicebus_name'), '/RootManageSharedAccessKey')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('namespaces_servicebus_name'))]"
+      ],
+      "properties": {
+        "rights": [
+          "Listen",
+          "Manage",
+          "Send"
+        ]
+      }
+    },
+    //{
+    //  "type": "Microsoft.ServiceBus/namespaces/networkRuleSets",
+    //  "apiVersion": "2021-01-01-preview",
+    //  "name": "[concat(parameters('namespaces_servicebus_name'), '/default')]",
+    //  "location": "[resourceGroup().location]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.ServiceBus/namespaces', parameters('namespaces_servicebus_name'))]"
+    //  ],
+    //  "properties": {
+    //    "defaultAction": "Deny",
+    //    "virtualNetworkRules": [],
+    //    "ipRules": []
+    //  }
+    //},
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics",
+      "apiVersion": "2021-01-01-preview",
+      "name": "[concat(parameters('namespaces_servicebus_name'), '/checkoutmessage')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('namespaces_servicebus_name'))]"
+      ],
+      "properties": {
+        "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S",
+        "maxSizeInMegabytes": 1024,
+        "requiresDuplicateDetection": false,
+        "duplicateDetectionHistoryTimeWindow": "PT10M",
+        "enableBatchedOperations": true,
+        "status": "Active",
+        "supportOrdering": true,
+        "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
+        "enablePartitioning": false,
+        "enableExpress": false
+      }
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics",
+      "apiVersion": "2021-01-01-preview",
+      "name": "[concat(parameters('namespaces_servicebus_name'), '/orderpaymentrequestmessage')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('namespaces_servicebus_name'))]"
+      ],
+      "properties": {
+        "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S",
+        "maxSizeInMegabytes": 1024,
+        "requiresDuplicateDetection": false,
+        "duplicateDetectionHistoryTimeWindow": "PT10M",
+        "enableBatchedOperations": true,
+        "status": "Active",
+        "supportOrdering": true,
+        "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
+        "enablePartitioning": false,
+        "enableExpress": false
+      }
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics",
+      "apiVersion": "2021-01-01-preview",
+      "name": "[concat(parameters('namespaces_servicebus_name'), '/orderpaymentupdatedmessage')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('namespaces_servicebus_name'))]"
+      ],
+      "properties": {
+        "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S",
+        "maxSizeInMegabytes": 1024,
+        "requiresDuplicateDetection": false,
+        "duplicateDetectionHistoryTimeWindow": "PT10M",
+        "enableBatchedOperations": true,
+        "status": "Active",
+        "supportOrdering": true,
+        "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
+        "enablePartitioning": false,
+        "enableExpress": false
+      }
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2021-01-01-preview",
+      "name": "[concat(parameters('namespaces_servicebus_name'), '/checkoutmessage/GloboTicketOrder')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('namespaces_servicebus_name'), 'checkoutmessage')]",
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('namespaces_servicebus_name'))]"
+      ],
+      "properties": {
+        "lockDuration": "PT1M",
+        "requiresSession": false,
+        "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S",
+        "deadLetteringOnMessageExpiration": false,
+        "deadLetteringOnFilterEvaluationExceptions": true,
+        "maxDeliveryCount": 10,
+        "status": "Active",
+        "enableBatchedOperations": true,
+        "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S"
+      }
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2021-01-01-preview",
+      "name": "[concat(parameters('namespaces_servicebus_name'), '/orderpaymentrequestmessage/GloboTicketOrder')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('namespaces_servicebus_name'), 'orderpaymentrequestmessage')]",
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('namespaces_servicebus_name'))]"
+      ],
+      "properties": {
+        "lockDuration": "PT1M",
+        "requiresSession": false,
+        "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S",
+        "deadLetteringOnMessageExpiration": false,
+        "deadLetteringOnFilterEvaluationExceptions": true,
+        "maxDeliveryCount": 10,
+        "status": "Active",
+        "enableBatchedOperations": true,
+        "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S"
+      }
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2021-01-01-preview",
+      "name": "[concat(parameters('namespaces_servicebus_name'), '/orderpaymentupdatedmessage/GloboTicketOrder')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('namespaces_servicebus_name'), 'orderpaymentupdatedmessage')]",
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('namespaces_servicebus_name'))]"
+      ],
+      "properties": {
+        "lockDuration": "PT1M",
+        "requiresSession": false,
+        "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S",
+        "deadLetteringOnMessageExpiration": false,
+        "deadLetteringOnFilterEvaluationExceptions": true,
+        "maxDeliveryCount": 10,
+        "status": "Active",
+        "enableBatchedOperations": true,
+        "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S"
+      }
+    }
+    //,
+    //{
+    //  "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions/rules",
+    //  "apiVersion": "2021-01-01-preview",
+    //  "name": "[concat(parameters('namespaces_servicebus_name'), '/checkoutmessage/GloboTicketOrder/$Default')]",
+    //  "location": "[resourceGroup().location]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.ServiceBus/namespaces/topics/subscriptions', parameters('namespaces_servicebus_name'), 'checkoutmessage', 'GloboTicketOrder')]",
+    //    "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('namespaces_servicebus_name'), 'checkoutmessage')]",
+    //    "[resourceId('Microsoft.ServiceBus/namespaces', parameters('namespaces_servicebus_name'))]"
+    //  ],
+    //  "properties": {
+    //    "action": {},
+    //    "filterType": "SqlFilter",
+    //    "sqlFilter": {
+    //      "sqlExpression": "1=1",
+    //      "compatibilityLevel": 20
+    //    }
+    //  }
+    //},
+    //{
+    //  "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions/rules",
+    //  "apiVersion": "2021-01-01-preview",
+    //  "name": "[concat(parameters('namespaces_servicebus_name'), '/orderpaymentrequestmessage/GloboTicketOrder/$Default')]",
+    //  "location": "[resourceGroup().location]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.ServiceBus/namespaces/topics/subscriptions', parameters('namespaces_servicebus_name'), 'orderpaymentrequestmessage', 'GloboTicketOrder')]",
+    //    "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('namespaces_servicebus_name'), 'orderpaymentrequestmessage')]",
+    //    "[resourceId('Microsoft.ServiceBus/namespaces', parameters('namespaces_servicebus_name'))]"
+    //  ],
+    //  "properties": {
+    //    "action": {},
+    //    "filterType": "SqlFilter",
+    //    "sqlFilter": {
+    //      "sqlExpression": "1=1",
+    //      "compatibilityLevel": 20
+    //    }
+    //  }
+    //},
+    //{
+    //  "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions/rules",
+    //  "apiVersion": "2021-01-01-preview",
+    //  "name": "[concat(parameters('namespaces_servicebus_name'), '/orderpaymentupdatedmessage/GloboTicketOrder/$Default')]",
+    //  "location": "[resourceGroup().location]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.ServiceBus/namespaces/topics/subscriptions', parameters('namespaces_servicebus_name'), 'orderpaymentupdatedmessage', 'GloboTicketOrder')]",
+    //    "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('namespaces_servicebus_name'), 'orderpaymentupdatedmessage')]",
+    //    "[resourceId('Microsoft.ServiceBus/namespaces', parameters('namespaces_servicebus_name'))]"
+    //  ],
+    //  "properties": {
+    //    "action": {},
+    //    "filterType": "SqlFilter",
+    //    "sqlFilter": {
+    //      "sqlExpression": "1=1",
+    //      "compatibilityLevel": 20
+    //    }
+    //  }
+    //}
+  ],
+    "outputs": {}
+ }

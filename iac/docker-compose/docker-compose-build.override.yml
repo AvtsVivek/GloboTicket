@@ -1,0 +1,40 @@
+# Where did we get mewurkacr.azurecr.io from?
+# Run the following command 
+# az acr show --resource-group Mewurk_aks --name MewurkAcr --query loginServer
+
+version: '3.4'
+
+services:
+  globoticket.web:
+    image: mewurkacr.azurecr.io/globoticket.web:4
+           
+  globoticket.services.eventcatalog:
+    image: mewurkacr.azurecr.io/globoticket.services.eventcatalog:1
+
+  globoticket.services.shoppingbasket:
+    image: mewurkacr.azurecr.io/globoticket.services.shoppingbasket:1
+  
+  globoticket.services.discount:
+    image: mewurkacr.azurecr.io/globoticket.services.discount:1
+
+  globoticket.services.ordering:
+    image: mewurkacr.azurecr.io/globoticket.services.ordering:1
+
+  #external.paymentgateway:
+  #  image: mewurkacr.azurecr.io/external.paymentgateway:1
+  
+  #globoticket.web.bff:
+  #  image: mewurkacr.azurecr.io/globoticket.web.bff:1
+  
+  #globoticket.gateway.mobilebff:
+  #  image: mewurkacr.azurecr.io/globoticket.gateway.mobilebff:1
+  
+  #globoticket.gateway.webbff:
+  #  image: mewurkacr.azurecr.io/globoticket.gateway.webbff:1 
+  
+  #globoticket.services.marketing:
+  #  image: mewurkacr.azurecr.io/globoticket.services.marketing:1
+  
+  #globoticket.services.payment:
+  #  image: mewurkacr.azurecr.io/globoticket.services.payment:1
+  

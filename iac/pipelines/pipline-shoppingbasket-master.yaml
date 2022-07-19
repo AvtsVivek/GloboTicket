@@ -1,0 +1,157 @@
+# Build and Release pipeline Shopping Basket
+# https://aka.ms/yaml
+
+variables:
+
+  # Agent VM image name
+- name: vmImageName
+  value: ubuntu-latest
+
+  # Container registry service connection established during pipeline creation
+- name: dockerRegistryServiceConnectionName
+  value: mewurk-globoticket-acr-service-connection
+- name: kubernetesClusterServiceConnectionName
+  value: mewurk-globoticket-aks-service-connection
+- name: imageRepository
+  value: 'globoticket.services.shoppingbasket'
+- name: dockerfileFolderPath
+  value: 'src/Services/GloboTicket.Services.ShoppingBasket'
+- name: tag
+  value: '$(Build.BuildId)'
+- name: kubernetes-deployment-manifest-folder
+  value: 'iac/kubernetes'
+- name: kubernetes-deployment-manifest-file
+  value: aks-globoticket.services.shoppingbasket.yaml
+
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - iac\pipelines\pipline-shoppingbasket-master.yaml
+    - iac\kubernetes\$(kubernetes-deployment-manifest-file)
+    - src\Services\GloboTicket.Services.ShoppingBasket\*
+
+
+name: $(date:yyyyMMdd)$(rev:.r)
+
+stages:
+
+  - stage: Build
+
+    variables:
+    - group: mewurk-yaml-master-dev
+
+    jobs:
+
+      - job: buildWebApp
+        displayName: Build Release pipeline for Shopping Basket Service on Master branch
+        pool:
+          vmImage: $(vmImageName)
+
+        steps:
+        - script: |
+            echo Build Release pipeline for Shopping Basket Service on Master branch
+            echo "This is the build pipe line. This produces the necessary artifacts for subsequent release pipeline."
+          displayName: 'Command Line Script to write out some vars'
+
+        - powershell: |
+            Write-Host "This is from power shell command task"
+            Write-Host "This writes out the env vars"
+            get-childitem -path env:*
+          displayName: 'PowerShell script to write out env vars'
+          condition: eq('${{ variables.Mewurk_OutputDiagnosticData }}', 'true')
+   
+        
+        - task: Docker@2
+          displayName: Build and Push tagged image to container registry
+          inputs:
+            command: buildAndPush
+            repository: $(imageRepository)
+            dockerfile: $(dockerfileFolderPath)/Dockerfile
+            containerRegistry: $(dockerRegistryServiceConnectionName)
+            buildContext: .
+            tags: |
+              $(tag)
+
+        - script: |
+            echo Build and Push to ACR failed.
+            echo The following Service Connections in azure devops needs to be deleted and recreated each time azure is provisioned.
+            echo Did you do that? Check it out
+            echo $(dockerRegistryServiceConnectionName)
+            echo $(kubernetesClusterServiceConnectionName)
+          displayName: 'Failed build meesage'
+          condition: failed() 
+
+        - task: PublishPipelineArtifact@1
+          inputs:
+            targetPath: '$(Build.SourcesDirectory)/iac/kubernetes'
+            artifact: 'manifests'
+            publishLocation: 'pipeline'
+
+  - stage: DeployToDev
+    displayName: Deploy to Dev Env
+    dependsOn: Build
+
+    jobs:
+      - deployment:
+        displayName: Deploy to Aks
+
+        variables:
+          - group: mewurk-yaml-master-dev
+
+        pool:
+          vmImage: $(vmImageName)
+
+        environment: Dev
+        strategy: 
+         runOnce:
+           deploy:
+             steps:
+              - script: |
+                    echo Any deploy stage starts here.
+                    echo '$(Build.SourcesDirectory)/GloboTicket/$(kubernetes-deployment-manifest-file)'
+                    echo '$(kubernetes-deployment-manifest-folder)/$(kubernetes-deployment-manifest-file)'
+                    echo build.artifactstagingdirectory and build.buildnumber are as follows.
+                    echo $(build.artifactstagingdirectory) $(build.buildnumber)
+                    echo $(Pipeline.Workspace)/manifests is '$(Pipeline.Workspace)/manifests'
+                displayName: 'Command Line Script to write out some messages'
+
+              - task: DownloadPipelineArtifact@2
+                inputs:
+                  buildType: 'current'
+                  artifactName: 'manifests'
+                  targetPath: '$(Pipeline.Workspace)/manifests'
+
+              - task: replacetokens@3
+                inputs:
+                  rootDirectory: '$(Pipeline.Workspace)/manifests'
+                  targetFiles: '$(Pipeline.Workspace)/manifests/$(kubernetes-deployment-manifest-file)'
+                  encoding: 'auto'
+                  writeBOM: true
+                  actionOnMissing: 'warn'
+                  keepToken: false
+                  tokenPrefix: '#{'
+                  tokenSuffix: '}#'
+                  useLegacyPattern: false
+                  enableTelemetry: true
+
+              - task: KubernetesManifest@0
+                displayName: 'Create Secret'
+                inputs:
+                  action: 'createSecret'
+                  kubernetesServiceConnection: $(kubernetesClusterServiceConnectionName)
+                  namespace: 'default'
+                  secretType: 'dockerRegistry'
+                  secretName: 'pullkey'
+                  dockerRegistryEndpoint: $(dockerRegistryServiceConnectionName)
+
+              - task: KubernetesManifest@0
+                displayName: 'Deploy to kubernetes'
+                inputs:
+                  action: 'deploy'
+                  kubernetesServiceConnection: $(kubernetesClusterServiceConnectionName)
+                  namespace: 'default'
+                  manifests: $(Pipeline.Workspace)/manifests/$(kubernetes-deployment-manifest-file)
+                   

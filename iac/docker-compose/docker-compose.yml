@@ -1,0 +1,52 @@
+version: '3.4'
+
+services:
+  globoticket.web:
+    image: ${DOCKER_REGISTRY-}globoticketweb
+    build:
+      context: ../..
+      dockerfile: src/Frontends/GloboTicket.Web/Dockerfile
+    environment:
+      - ApiConfigs__EventCatalog__Uri=http://globoticket.services.eventcatalog
+      - ApiConfigs__ShoppingBasket__Uri=http://globoticket.services.shoppingbasket
+      - ApiConfigs__Discount__Uri=http://globoticket.services.discount
+      - ApiConfigs__Order__Uri=http://globoticket.services.ordering
+      - ApiConfigs__Marketing__Uri=http://globoticket.services.marketing
+    depends_on:
+      - globoticket.services.eventcatalog
+      - globoticket.services.shoppingbasket
+      - globoticket.services.discount
+      - globoticket.services.ordering
+      #- globoticket.services.marketing
+
+  globoticket.services.eventcatalog:
+    image: ${DOCKER_REGISTRY-}globoticketserviceseventcatalog
+    build:
+      context: ../..
+      dockerfile: src/Services/GloboTicket.Services.EventCatalog/Dockerfile
+
+  globoticket.services.shoppingbasket:
+    image: ${DOCKER_REGISTRY-}globoticketservicesshoppingbasket
+    build:
+      context: ../..
+      dockerfile: src/Services/GloboTicket.Services.ShoppingBasket/Dockerfile
+    environment:
+      - ApiConfigs__EventCatalog__Uri=http://globoticket.services.eventcatalog
+      - ApiConfigs__Discount__Uri=http://globoticket.services.discount
+    depends_on:
+      - globoticket.services.eventcatalog
+      - globoticket.services.discount
+
+  globoticket.services.discount:
+    image: ${DOCKER_REGISTRY-}globoticketservicesdiscount
+    build:
+      context: ../..
+      dockerfile: src/Services/GloboTicket.Services.Discount/Dockerfile
+
+
+  globoticket.services.ordering:
+    image: ${DOCKER_REGISTRY-}globoticketservicesordering
+    build:
+      context: ../..
+      dockerfile: src/Services/GloboTicket.Services.Ordering/Dockerfile
+

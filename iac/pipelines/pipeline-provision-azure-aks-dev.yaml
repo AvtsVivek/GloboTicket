@@ -1,0 +1,214 @@
+# Build and Release pipeline
+# https://aka.ms/yaml
+
+variables:
+- name: finalBuildArtifactName
+  value: 'aspNetCoreDropFromYaml'
+- name: BuildParameters.RestoreBuildProjects
+  value: '**/*.csproj'
+- name: BuildParameters.TestProjects
+  value: '**/*[Tt]ests/*.csproj'
+- name: buildConfiguration
+  value: 'Release'
+
+  # Agent VM image name
+- name: vmImageName
+  value: ubuntu-latest
+
+- group: mewurk-globoticket-aks
+  # Container registry service connection established during pipeline creation
+- name: dockerRegistryServiceConnection
+  value: 'd072f8f6-fa61-4804-980e-bb667cd773b1'
+- name: imageRepository
+  value: 'globoticket.services.discount'
+- name: containerRegistry
+  value: 'reacrtrialsregistry.azurecr.io'
+- name: dockerfileFolderPath
+  value: 'src/Services/GloboTicket.Services.Discount'
+- name: tag
+  value: '$(Build.BuildId)'
+
+
+# I dont think, we need a trigger for this. 
+# When we want to provision, we will trigger this manually.
+#trigger:
+#  branches:
+#    include:
+#    - master
+
+#  paths:
+#    include:
+#    - iac\pipelines\pipeline-provision-azure-dev.yaml
+
+
+name: $(date:yyyyMMdd)$(rev:.r)
+
+stages:
+
+  - stage: Build
+    jobs:
+      - job: buildWebApp
+        displayName: Build Release pipeline for Discount Service on Master branch
+        pool:
+          vmImage: $(vmImageName)
+
+        steps:
+        - script: |
+            echo Build Release pipeline for Discount Service on Master branch
+            echo build.artifactstagingdirectory and build.buildnumber are as follows.
+            echo $(build.artifactstagingdirectory) $(build.buildnumber)
+            echo $(projects)
+            echo $(BuildConfiguration)
+            echo Pipeline.Workspace is $(Pipeline.Workspace)
+            echo The current branch is - $(Build.SourceBranchName)!!.
+            echo $(finalBuildArtifactName)
+            echo "This is the build pipe line. This produces the necessary artifacts for subsequent release pipeline."
+          displayName: 'Command Line Script to write out some vars'
+
+        - powershell: |
+            Write-Host "This is from power shell command task"
+            Write-Host "This writes out the env vars"
+            get-childitem -path env:*
+          displayName: 'PowerShell script to write out env vars'
+          condition: eq('${{ variables.Mewurk_OutputDiagnosticData }}', 'true')
+
+        - checkout: self
+
+        - task: CopyFiles@2
+          displayName: Copy Azure Resource Group folder
+          inputs:
+            SourceFolder: 'iac/ArmTemplates/AzureDeploySqlOnAks/'
+            Contents: 'azuredeploysqlonaks*.json'
+            TargetFolder: '$(build.artifactStagingDirectory)/ArmTemplates'
+
+        - task: PublishBuildArtifacts@1
+          displayName: Publish Artifact
+          condition: succeededOrFailed()
+          inputs:
+            PathtoPublish: '$(build.artifactstagingdirectory)'
+            ArtifactName: '$(finalBuildArtifactName)'
+            PublishLocation: 'Container' 
+
+  - stage: DeployToDev
+    displayName: Deploy to Dev Env
+    jobs:
+      - deployment:
+
+        #variables:
+        #  - group: mewurk-globoticket-aks
+
+        pool:
+          vmImage: ubuntu-latest
+        environment: Dev
+        strategy: 
+         runOnce:
+           deploy:
+             steps:
+              - task: replacetokens@3
+                inputs:
+                  rootDirectory: '$(Pipeline.Workspace)/$(finalBuildArtifactName)/ArmTemplates'
+                  targetFiles: 'azuredeploysqlonaks.parameters.json'
+                  encoding: 'auto'
+                  writeBOM: true
+                  actionOnMissing: 'warn'
+                  keepToken: false
+                  tokenPrefix: '#'
+                  tokenSuffix: '#'
+                  useLegacyPattern: false
+                  enableTransforms: false
+                  enableTelemetry: true
+                displayName: 'Replace Tokens In paramters json template file' 
+
+              - task: AzureResourceManagerTemplateDeployment@3
+                displayName: 'Create Services in a Given Resource Group'
+                inputs:
+                  deploymentScope: 'Resource Group'
+                  azureResourceManagerConnection: 'AzureServiceConnection'
+                  subscriptionId: '672af1bb-6b87-4874-b13b-98b834a1df8e'
+                  action: 'Create Or Update Resource Group'
+                  resourceGroupName: '$(arm_MeWurk_Aks_ResourceGroupName)'
+                  location: '$(arm_MeWurk_Aks_ResourceGroupLocation)'
+                  templateLocation: 'Linked artifact'
+                  csmFile: '$(Pipeline.Workspace)/$(finalBuildArtifactName)/ArmTemplates/azuredeploysqlonaks.json'
+                  csmParametersFile: '$(Pipeline.Workspace)/$(finalBuildArtifactName)/ArmTemplates/azuredeploysqlonaks.parameters.json'
+                  deploymentMode: 'Incremental'
+
+              - powershell: |
+                  Write-Host "Consider the following commands you may have to run now."
+                  Write-Host ""
+                  Write-Host "Ensure AKS can pull images from ACR"
+                  Write-Host "az aks get-credentials --name $(arm_mewurk-aks-name) --resource-group $(arm_MeWurk_Aks_ResourceGroupName)"
+                  Write-Host "az aks get-credentials --name $(arm_mewurk-aks-name) --resource-group $(arm_MeWurk_Aks_ResourceGroupName) --overwrite-existing"
+                  Write-Host "kubectl config get-contexts"
+                  Write-Host "kubectl get nodes"
+                  #az aks get-credentials --resource-group Vivek-SqlCl-rg --name Vivek-SqlCl-Aks
+                  #Write-Host "az aks check-acr --name $(arm_mewurk-aks-name) --resource-group $(arm_MeWurk_Aks_ResourceGroupName) --acr $(arm_container_registry).azurecr.io"
+                  #Write-Host "Run the below command and wait for a few minutes."
+                  #Write-Host "az aks update --resource-group $(arm_MeWurk_Aks_ResourceGroupName) --name $(arm_mewurk-aks-name) --attach-acr $(arm_container_registry)"
+                  #Write-Host "Wait for a few minutes and run the check again with the below cmmand again."
+                  #Write-Host "Ensure its all green this time."
+                  #Write-Host "az aks check-acr --name $(arm_mewurk-aks-name) --resource-group $(arm_MeWurk_Aks_ResourceGroupName) --acr $(arm_container_registry).azurecr.io"
+                  #Write-Host "az acr import -n $(arm_container_registry) --source docker.io/library/nginx:latest --image nginx:v1"
+                  #Write-Host "az aks get-credentials --name $(arm_mewurk-aks-name) --resource-group $(arm_MeWurk_Aks_ResourceGroupName)"
+                  #Write-Host "az aks get-credentials --name $(arm_mewurk-aks-name) --resource-group $(arm_MeWurk_Aks_ResourceGroupName) --overwrite-existing"
+                  #Write-Host "Some References"
+                  #Write-Host "https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal?tabs=azure-cli"
+                  #Write-Host "https://docs.microsoft.com/en-us/azure/aks/cluster-container-registry-integration?tabs=azure-cli"
+                  #Write-Host "https://docs.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest#az_aks_check_acr"
+                  
+                  #Write-Host ""
+                  #Write-Host "The following Service Connections in azure devops needs to be deleted(if already exists) and recreated."
+                  #Write-Host "mewurk-globoticket-acr-service-connection"
+                  #Write-Host "mewurk-globoticket-aks-service-connection"
+                  
+                  #Write-Host ""
+                  #Write-Host "cd into your sql folder, something like the following."
+                  #Write-Host "cd D:\Vivek\MxWork\PtMs_Globo\iac\sql"
+                  #Write-Host "Then execute the following commands to populate the databasess."
+                  #Write-Host "sqlcmd -S $(arm_MeWurk_Aks_SqlServerName).database.windows.net,1433 -d GloboTicketShoppingbasketDB -U $(arm_MeWurk_Aks_SqlServer_Admin_UserName) -P $(arm_MeWurk_Aks_SqlServer_Admin_Password) -i Shoppingbasket-create.sql"
+                  #Write-Host "sqlcmd -S $(arm_MeWurk_Aks_SqlServerName).database.windows.net,1433 -d GloboTicketOrderDb -U $(arm_MeWurk_Aks_SqlServer_Admin_UserName) -P $(arm_MeWurk_Aks_SqlServer_Admin_Password) -i OrderDB-create.sql"
+                  #Write-Host "sqlcmd -S $(arm_MeWurk_Aks_SqlServerName).database.windows.net,1433 -d GloboTicketMarketingDb -U $(arm_MeWurk_Aks_SqlServer_Admin_UserName) -P $(arm_MeWurk_Aks_SqlServer_Admin_Password) -i MarketingDB-create.sql"
+                  #Write-Host "sqlcmd -S $(arm_MeWurk_Aks_SqlServerName).database.windows.net,1433 -d GloboTicketEventCatalogDb -U $(arm_MeWurk_Aks_SqlServer_Admin_UserName) -P $(arm_MeWurk_Aks_SqlServer_Admin_Password) -i EventCatalogDB-create.sql"
+                  #Write-Host "sqlcmd -S $(arm_MeWurk_Aks_SqlServerName).database.windows.net,1433 -d GloboTicketDiscountDB -U $(arm_MeWurk_Aks_SqlServer_Admin_UserName) -P $(arm_MeWurk_Aks_SqlServer_Admin_Password) -i TicketDiscountDB-create.sql"
+                  
+                  #Write-Host ""
+                  #Write-Host "create secrets for db connection strings as follows."
+                  #Write-Host "kubectl create secret generic shoppingbasket-db --from-literal=connectionstring=`"Data Source=tcp:$(arm_MeWurk_Aks_SqlServerName).database.windows.net,1433;Initial Catalog=GloboTicketShoppingbasketDB;Persist Security Info=False;User ID=$(arm_MeWurk_Aks_SqlServer_Admin_UserName);Password=$(arm_MeWurk_Aks_SqlServer_Admin_Password);Connect Timeout=30;Encrypt=True;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultipleActiveResultSets=False;`""
+                  #Write-Host "kubectl create secret generic ordering-db --from-literal=connectionstring=`"Data Source=tcp:$(arm_MeWurk_Aks_SqlServerName).database.windows.net,1433;Initial Catalog=GloboTicketOrderDb;Persist Security Info=False;User ID=$(arm_MeWurk_Aks_SqlServer_Admin_UserName);Password=$(arm_MeWurk_Aks_SqlServer_Admin_Password);Connect Timeout=30;Encrypt=True;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultipleActiveResultSets=False;`""
+                  #Write-Host "kubectl create secret generic marketing-db --from-literal=connectionstring=`"Data Source=tcp:$(arm_MeWurk_Aks_SqlServerName).database.windows.net,1433;Initial Catalog=GloboTicketMarketingDb;Persist Security Info=False;User ID=$(arm_MeWurk_Aks_SqlServer_Admin_UserName);Password=$(arm_MeWurk_Aks_SqlServer_Admin_Password);Connect Timeout=30;Encrypt=True;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultipleActiveResultSets=False;`""
+                  #Write-Host "kubectl create secret generic eventcatalog-db --from-literal=connectionstring=`"Data Source=tcp:$(arm_MeWurk_Aks_SqlServerName).database.windows.net,1433;Initial Catalog=GloboTicketEventCatalogDb;Persist Security Info=False;User ID=$(arm_MeWurk_Aks_SqlServer_Admin_UserName);Password=$(arm_MeWurk_Aks_SqlServer_Admin_Password);Connection Timeout=30;Encrypt=True;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultipleActiveResultSets=False;`""
+                  #Write-Host "kubectl create secret generic discount-db --from-literal=connectionstring=`"Data Source=tcp:$(arm_MeWurk_Aks_SqlServerName).database.windows.net,1433;Initial Catalog=GloboTicketDiscountDB;Persist Security Info=False;User ID=$(arm_MeWurk_Aks_SqlServer_Admin_UserName);Password=$(arm_MeWurk_Aks_SqlServer_Admin_Password);Connect Timeout=30;Encrypt=True;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultipleActiveResultSets=False;`""
+
+                  #Write-Host ""
+                  #Write-Host "For the kubernetes objects to access the service bus, we need to create a secret as follows."
+                  #Write-Host "Go to the service bus that got created in the azure portal. It should be $(arm_service_bus)"
+                  #Write-Host "Click Shared access policies, then RootManageSharedAccessKey. Copy the primary connection string."
+                  #Write-Host "It looks something like this."
+                  #Write-Host "Endpoint=sb://mewurkgloboservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=G1+xxV5yHw7JcgkaIyI/XrpthIyWB/Ch27oVHPYrerk="
+                  #Write-Host "With that, create a kubectl secret. It should look as follows"
+                  #Write-Host "kubectl create secret generic azureservicebus-secret --from-literal=az-sb-connectionstring=`"Endpoint=sb://mewurkgloboservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=G1+xxV5yHw7JcgkaIyI/XrpthIyWB/Ch27oVHPYrerk=`""
+
+                  #Write-Host ""
+                  #Write-Host "Do the following for starting Kubernetes dashboard"
+                  #Write-Host "kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml"
+                  #Write-Host "Run the following kubectl command for dashboard credentials. "
+                  #Write-Host "kubectl apply -f D:\Vivek\Trials\PtMs\iac\kubernetes\dashboard-credentials.yaml"
+                  #Write-Host "If everything goes fine, then run the folowing for proxy"
+                  #Write-Host "kubectl proxy"
+                  #Write-Host "Now browse to the following url"
+                  #Write-Host "http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login"
+                  #Write-Host "To get the token, run the following in a bash shell, git bash shell for exeample."
+                  #Write-Host "kubectl -n kubernetes-dashboard describe secret `$(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print `$1}')"
+                  #Write-Host "Now try these for nodes and namespaces"
+                  #Write-Host "http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/namespace?namespace=default"
+                  #Write-Host "http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/node?namespace=default"
+                  #Write-Host "The following is a reference with respect to Kubernetes dashboard"
+                  #Write-Host "https://github.com/kubernetes/dashboard/tree/master/aio/deploy/recommended"
+                  #Write-Host ""
+                  Write-Host ""
+                  Write-Host "Currently monitoring is not enabled in the created AKS. `$(arm_mewurk-aks-name)"
+                  Write-Host "To enable this, take a look at the following portal."
+                  Write-Host "https://docs.microsoft.com/en-us/azure/azure-monitor/containers/container-insights-enable-existing-clusters"
+                  Write-Host ""
+                  Write-Host "Now run the other service pipelines. Run the UI pipeline at the end."
+                displayName: 'Instructions After provisioning'

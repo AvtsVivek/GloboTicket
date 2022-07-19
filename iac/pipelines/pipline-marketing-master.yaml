@@ -1,0 +1,106 @@
+# Build and Release pipeline
+# https://aka.ms/yaml
+
+variables:
+
+  # Agent VM image name
+- name: vmImageName
+  value: ubuntu-latest
+
+  # Container registry service connection established during pipeline creation
+- name: dockerRegistryServiceConnection
+  value: AcrScMewurkGloboTicket
+- name: imageRepository
+  value: 'globoticket.services.discount'
+- name: dockerfileFolderPath
+  value: 'src/Services/GloboTicket.Services.Discount'
+- name: tag
+  value: '$(Build.BuildId)'
+
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - iac\pipelines\pipline-discount-master.yaml
+    - iac\kubernetes\aks-globoticket.services.discount.yaml
+    - src\Services\GloboTicket.Services.Discount\*
+
+
+name: $(date:yyyyMMdd)$(rev:.r)
+
+stages:
+
+  - stage: Build
+
+    variables:
+    - group: mewurk-yaml-master-dev
+
+    jobs:
+
+      - job: buildWebApp
+        displayName: Build Release pipeline for Discount Service on Master branch
+        pool:
+          vmImage: $(vmImageName)
+
+        steps:
+        - script: |
+            echo Build Release pipeline for Discount Service on Master branch
+            echo "This is the build pipe line. This produces the necessary artifacts for subsequent release pipeline."
+          displayName: 'Command Line Script to write out some vars'
+
+        - powershell: |
+            Write-Host "This is from power shell command task"
+            Write-Host "This writes out the env vars"
+            get-childitem -path env:*
+          displayName: 'PowerShell script to write out env vars'
+
+        - checkout: self
+
+        - task: Docker@2
+          displayName: Build the image 
+          inputs:
+            command: build
+            repository: $(imageRepository)
+            dockerfile: $(dockerfileFolderPath)/Dockerfile
+            buildContext: .
+            tags: |
+              $(tag)  
+
+        - script: |
+            sudo docker tag $(imageRepository):$(tag) $(MewurkAzureContainerRegistryName)/$(imageRepository):$(tag)
+          displayName: 'Tag container image before push'
+
+        - task: Docker@2
+          displayName: Push an tagged image to container registry
+          inputs:
+            command: push
+            repository: $(imageRepository)
+            dockerfile: $(dockerfileFolderPath)/Dockerfile
+            buildContext: . 
+            containerRegistry: $(dockerRegistryServiceConnection) 
+            tags: |
+              $(tag)      
+
+  - stage: DeployToDev
+    displayName: Deploy to Dev Env
+    jobs:
+      - deployment:
+
+        variables:
+          - group: mewurk-yaml-master-dev
+
+        pool:
+          vmImage: $(vmImageName)
+
+        environment: Dev
+        strategy: 
+         runOnce:
+           deploy:
+             steps:
+              - script: |
+                    echo Any deploy stage starts here.
+                displayName: 'Command Line Script to write out some messages'
+
+                  
